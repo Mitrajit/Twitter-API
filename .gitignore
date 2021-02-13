@@ -1,0 +1,10 @@
+__pycache__/
+build/
+dist/
+cf/
+*.cfg
+config.py
+status.json
+*.spec
+firsttweet.py
+encryptdecrypt.py
