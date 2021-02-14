@@ -1,9 +1,32 @@
-import sys, tweepy, geocoder
+import sys, tweepy, geocoder, argparse
 from playsound import playsound
 import encryptdecrypt38
+my_parser = argparse.ArgumentParser(description='List the content of a folder')
+my_parser.add_argument('tweet',
+                       metavar='tweet',
+                       type=str,
+                       action="append",
+                       nargs="*",
+                       help='tweet <The text you want to tweet>')
+my_parser.add_argument('-api',
+                       type=str,
+                       metavar=("<api key>", "<api secret>" , "<token key>","<token secret>"),
+                       action="store",
+                       help='gets the api keys and secrets',
+                       nargs=4)
+my_parser.add_argument('-tr',
+                       type=str,
+                       metavar=("place name or global"),
+                       action="store",
+                       help='gets the trending in the given place',
+                       nargs="*")
+my_parser.add_argument('-d',
+                       action="store_true",
+                       help='deletes the last tweet')
+args = my_parser.parse_args()
 try :
-    if sys.argv[1]=='-API'or sys.argv[1]=='-api':
-        encryptdecrypt38.encrypt([sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5]])
+    if args.api is not None:
+        encryptdecrypt38.encrypt([args.api[0],args.api[1],args.api[2],args.api[3]])
         print('API, tokens keys and secrets are saved')
         sys.exit(0)
     cred=encryptdecrypt38.decrypt()
@@ -18,7 +41,7 @@ except tweepy.error.TweepError as tp:
 except IndexError as tw:
     print("tweet followed by Text in \"\" tweets from the account logged in\n-api <api key> <api secret> <token key> <token secret>\n-d\tdeletes the last tweet sent\n-tr\t shows trends of the region")
     sys.exit(0)
-if sys.argv[1] == '-d' :
+if args.d :
     tweet = api.user_timeline(count = 1)[0]
     print("Are you sure you want to delete this tweet(Y/N):\n",tweet.text.lstrip())
     confirm = input('')
@@ -28,8 +51,8 @@ if sys.argv[1] == '-d' :
         print('Tweet is deleted')
     else:
         print('Tweet is not deleted')
-elif sys.argv[1]=='-tr':
-    loc = api.me().location
+elif args.tr != None:
+    loc = api.me().location if len(args.tr)==0 else " ".join(args.tr)
     print("Trending today for",loc)
     g = geocoder.osm(loc) # getting object that has location's latitude and longitude
     closest_loc = api.trends_closest(g.lat, g.lng)
@@ -44,6 +67,6 @@ elif sys.argv[1]=='-tr':
     #     for trends in json.loads(j.read())[0]['trends'][0:9] :
     #         print(trends['name']+"\t"+str(trends['tweet_volume']))
 else :
-    api.update_status(status = sys.argv[1])
+    api.update_status(status = " ".join(args.tweet[0]))
     playsound('tweet-sfx.mp3')
     print("Tweeted")
