@@ -1,24 +1,14 @@
 import sys, tweepy, geocoder
 from playsound import playsound
-from cryptography.fernet import Fernet
+import encryptdecrypt38
 try :
     if sys.argv[1]=='-API'or sys.argv[1]=='-api':
-        cred = [b'']*5
-        cred[2]=Fernet.generate_key().decode("UTF-8")
-        f=Fernet(cred[2])
-        cred[0]=f.encrypt(bytes(sys.argv[2],'UTF-8')).decode()
-        cred[1]=f.encrypt(bytes(sys.argv[3],'UTF-8')).decode("UTF-8")
-        cred[3]=f.encrypt(bytes(sys.argv[4],'UTF-8')).decode("UTF-8")
-        cred[4]=f.encrypt(bytes(sys.argv[5],'UTF-8')).decode("UTF-8")
-        with open("cf.cfg","w") as wr:
-            wr.write("\n".join(cred))
+        encryptdecrypt38.encrypt([sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5]])
         print('API, tokens keys and secrets are saved')
         sys.exit(0)
-    handler = open("cf.cfg","r")
-    cred = handler.read().split()
-    f = Fernet(cred[2].encode())
-    auth = tweepy.OAuthHandler(f.decrypt(cred[0].encode()).decode(), f.decrypt(cred[1].encode()).decode())
-    auth.set_access_token(f.decrypt(cred[3].encode()).decode(), f.decrypt(cred[4].encode()).decode())
+    cred=encryptdecrypt38.decrypt()
+    auth = tweepy.OAuthHandler(cred[0], cred[1])
+    auth.set_access_token(cred[2], cred[3])
     print("OAuthHandler set")
     api = tweepy.API(auth)
     print("logged in as @"+api.me().screen_name)
@@ -26,7 +16,7 @@ except tweepy.error.TweepError as tp:
     print("Could not log in with the given credentials\n",tp)
     sys.exit(0)
 except IndexError as tw:
-    print("tweet followed by Text in \"\" tweets from the account logged in\n-api <api key> <api secret> <token key> <token secret>-d\tdeletes the last tweet sent\n-tr\t shows trends of the region")
+    print("tweet followed by Text in \"\" tweets from the account logged in\n-api <api key> <api secret> <token key> <token secret>\n-d\tdeletes the last tweet sent\n-tr\t shows trends of the region")
     sys.exit(0)
 if sys.argv[1] == '-d' :
     tweet = api.user_timeline(count = 1)[0]
