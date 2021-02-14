@@ -1,5 +1,6 @@
 import sys, tweepy, geocoder, argparse
 from playsound import playsound
+from tabulate import tabulate
 import encryptdecrypt38
 my_parser = argparse.ArgumentParser(description='List the content of a folder')
 my_parser.add_argument('tweet',
@@ -56,10 +57,9 @@ elif args.tr != None:
     print("Trending today for",loc)
     g = geocoder.osm(loc) # getting object that has location's latitude and longitude
     closest_loc = api.trends_closest(g.lat, g.lng)
-    trends = api.trends_place(closest_loc[0]['woeid'])
+    trends = api.trends_place(closest_loc[0]['woeid'])[0]['trends'][0:9]
     playsound('tweet-sfx.mp3')
-    for trds in trends[0]['trends'][0:9] :
-        print(trds['name']+"\t"+str(trds['tweet_volume']))
+    print(tabulate([[trds['name'],trds['tweet_volume'],trds['url']]for trds in trends],headers=["Name","No. of tweets","URL"]))
     # with open("twitter_{}_trend.json".format(loc),"w") as wp:
     #     wp.write(json.dumps(trends, indent=1))
     # print("Trending today for",loc)
