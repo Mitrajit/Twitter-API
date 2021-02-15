@@ -1,0 +1,6 @@
+tweepy
+cryptography
+geocoder
+argparse
+playsound
+tabulate
